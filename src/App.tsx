@@ -2,11 +2,11 @@ import React, { useEffect, useState, MouseEvent } from 'react';
 import api from './services/api'
 import socketIOClient, { Socket } from "socket.io-client";
 import  QRCode  from 'qrcode.react';
+import { kStringMaxLength } from 'buffer';
 
 function App() {
   const [socket, setSocket] = useState<Socket>()
-  const [qrCode, setQrCode] = useState("1@dsBA9duO0/u2qOmT1FdDmOBYH0oFE6dWiIL7730rC9WeoB277aUmL1n5D4KW6lpd/Z1C7IIoWzZf8w==,TTpYk9kx/2asE9llELuc0sbwPxiis9e0dCVmk+gCjT4=,6LPEwc7XD1kaMEfBsRBfhQ==")
-  const [qrCodeImage, setQrCodeImage] = useState<string>()
+  const [qrCodeImage, setQrCodeImage] = useState<String>()
 
   const ENDPOINT = "http://localhost:5000";
 
@@ -17,28 +17,46 @@ function App() {
 
   }, [ENDPOINT]);
 
+  // sets qrcode image
   useEffect(() => {
     if (socket) {
 
+      const getQrCode = async(url:string)=>{
+
+     const qrCodeImg = await  dataUrlToFile(url, "qrCode.png", "image/png");
+
+
+      }
       socket.on("qr", (qrCode: string) => {
-        console.log("my qr code", qrCode)
-        //@ts-ignore
-        setQrCode(qrCode)
+         setQrCodeImage(qrCode)
+         console.log(qrCode)
       })
 
 
     }
   }, [socket])
+  async function dataUrlToFile(dataUrl: string, fileName: string,mimetype:string): Promise<File> {
+
+    const res: Response = await fetch(dataUrl);
+    const blob: Blob = await res.blob();
+    return new File([blob], fileName, { type: mimetype });
+}
+
+ const handleConnection = async ()=>{
+   const response = await api.post("/create/session");
+
+   console.log("Minha response",response)
 
 
+ }
 
   return (
     <div className="App">
 
       <h1>Hello World</h1>
-            {/*@ts-ignore*/}
-{/* { qrCode&&<QRCode value={"1@dsBA9duO0/u2qOmT1FdDmOBYH0oFE6dWiIL7730rC9WeoB277aUmL1n5D4KW6lpd/Z1C7IIoWzZf8w==,TTpYk9kx/2asE9llELuc0sbwPxiis9e0dCVmk+gCjT4=,6LPEwc7XD1kaMEfBsRBfhQ=="} style={{height:280,width:180}} />} */}
-      <img src={`data:image/png;base64,${qrCodeImage}`}/>
+      {qrCodeImage&&<img src={`data:image/png;base64,${qrCodeImage}`} style={{height:400}}/>}
+
+     <button onClick={handleConnection}>Conectar</button>
     </div >
   );
 }
