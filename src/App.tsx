@@ -18,7 +18,9 @@ function App() {
   const [socket, setSocket] = useState<Socket>()
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [qrCodeFile, setQrCodeFile] = useState<string | null>(null)
-  const [contacts, setContacts] = useState<Array<IContact>>([])
+  const [sendToSpecificContacts, setSendToSpecifContacts] = useState<boolean>()
+  const [hasConnected, setHasConnected] = useState<boolean>(false)
+  const [sendToCSVcontactList, setSendCSVList] = useState<boolean>()
 
 
   const ENDPOINT = "http://localhost:5000";
@@ -34,7 +36,6 @@ function App() {
   useEffect(() => {
     if (socket) {
 
-     
       socket.on("qr", (qrCode: string) => {
          setQrCode(qrCode)
          console.log("qrCode",qrCode)
@@ -45,47 +46,93 @@ function App() {
        
      })
 
+     socket.on("authentication", (auth:boolean) => {
+       console.log("Has authenticated")
+      setHasConnected(true)
+   })
+
 
     }
   }, [socket])
-  async function dataUrlToFile(dataUrl: string, fileName: string,mimetype:string): Promise<File> {
-
-    const res: Response = await fetch(dataUrl);
-    const blob: Blob = await res.blob();
-    return new File([blob], fileName, { type: mimetype });
-}
 
  const handleConnection = async ()=>{
    const response = await api.post("/create/session");
 
    console.log("Minha response",response)
  }
-
- const handleAddContact = async ()=>{
-   setContacts([...contacts,{name:'', number:''}])
-   console.log("contatos",contacts)
-
- }
-
+  const [inputList, setInputList] = useState([{ name: "", number: "" }]);
+ 
+  // handle input change
+      //@ts-ignore
+  const handleInputChange = (e, index) => {
+    //@ts-ignore
+    const { name, value } = e.target;
+    const list = [...inputList];
+    //@ts-ignore
+    list[index][name] = value;
+    setInputList(list);
+  };
+ 
+  // handle click event of the Remove button
+  const handleRemoveClick = (index:number )=> {
+    const list = [...inputList];
+    list.splice(index, 1);
+    setInputList(list);
+  };
+ 
+  // handle click event of the Add button
+  const handleAddClick = () => {
+    setInputList([...inputList, { name: "", number: "" }]);
+  };
+ 
   return (
+
     <div className="App">
 
       <h1>Hello World</h1>
 
-      { qrCode&& <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
+      { qrCode && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
 
-     <button onClick={handleConnection}>Conectar</button>
-     <button>Enviar Mensagem</button>
+     {!hasConnected&&<button onClick={handleConnection}>Conectar</button>}
 
-     <button
-      onChange={handleAddContact}
-     >Adicionar contato</button>
-     {contacts&& contacts.map((element,index)=>
-     <input 
-     //@ts-ignore
-     onChange={(e)=>setContacts([...contacts, contacts[index].name = String(e.target.value)])}
-     value={contacts[index]?.name}
-     />)}
+    { hasConnected && sendToSpecificContacts&&<>
+     {inputList.map((contact, i) => {
+        return (
+          <>
+          <div className="box">,
+          <h1>Contato {i}</h1>
+            <input
+              name="name"
+             placeholder="Insíra o nome do contato"
+              value={contact.name}
+              onChange={e => handleInputChange(e, i)}
+            />
+            <input
+              className="ml10"
+              name="number"
+            placeholder="Insira o número"
+              value={contact.number}
+              onChange={e => handleInputChange(e, i)}
+            />
+            <div className="btn-box">
+              {inputList.length !== 1 && <button
+                className="mr10"
+                onClick={() => handleRemoveClick(i)}>Remove</button>}
+              {inputList.length - 1 === i && <button onClick={handleAddClick}>Adicionar Contado</button>}
+            </div>
+          </div>
+          <button>Enviar Mensagem</button>
+          </>
+        );
+      })}
+  </>}
+  {hasConnected&&sendToCSVcontactList&&
+  <>
+    <div className="box">,
+      <button>Enviar Arquivo CSV</button>
+      <button>Enviar enviar para contatos</button>
+    </div>
+  </>}
     </div >
   );
 }
