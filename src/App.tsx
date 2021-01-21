@@ -179,7 +179,7 @@ function App() {
   
     <input placeholder="Digite a mensagem desejada" value={message} onChange={(e)=>setMessage(e.target.value)}></input>
     {/* @ts-ignore*/}
-    <input type="file" style={{display:'block',marginTop:15}}  value={csv}onChange={(e)=>setCSV(e.target.files[0])}/>
+    <input type="file" style={{display:'block',marginTop:15}}  onChange={(e)=>setCSV(e.target.files[0])}/>
     <button onClick={handleSendCSV}>Enviar Mensagem</button>
 
 
