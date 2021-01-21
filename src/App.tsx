@@ -91,7 +91,7 @@ function App() {
 
       <h1>Hello World</h1>
 
-      { qrCode && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
+      { qrCode && !hasConnected && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
 
      {!hasConnected&&<button onClick={handleConnection}>Conectar</button>}
 
