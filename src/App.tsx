@@ -126,12 +126,17 @@ function App() {
     formData.append("message",message);
     await api.post("/send/bulk/csv", formData,{headers: {'Content-Type': 'multipart/form-data' }});
   }
- 
+ const handleDisconnection = async ()=>{
+  setSendToSpecifContacts(false)
+  setSendToCSVContactList(false)
+  setHasChosenMode(false)
+  setHasConnected(false)
+  setQrCode('')
+
+ }
   return (
 
     <div className="App">
-
-      <h1>Hello World</h1>
 
       { qrCode && !hasConnected && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
 
@@ -184,6 +189,7 @@ function App() {
 
 
   </>}
+  {hasConnected&&<button onClick={handleDisconnection} style={{display:'block',marginTop:15}}>Desconectar</button>}
     </div >
   );
 }
