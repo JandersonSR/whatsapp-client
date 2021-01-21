@@ -20,7 +20,12 @@ function App() {
   const [qrCodeFile, setQrCodeFile] = useState<string | null>(null)
   const [sendToSpecificContacts, setSendToSpecifContacts] = useState<boolean>()
   const [hasConnected, setHasConnected] = useState<boolean>(false)
-  const [sendToCSVcontactList, setSendCSVList] = useState<boolean>()
+  const [sendToCSVContactList, setSendToCSVContactList] = useState<boolean>()
+  const [hasChosenMode, setHasChosenMode] = useState(false)
+  const [inputList, setInputList] = useState([{ name: "", number: "" }]);
+  const [message, setMessage] = useState<string>()
+  const [csv, setCSV] = useState<FileList>()
+
 
 
   const ENDPOINT = "http://localhost:5000";
@@ -50,7 +55,10 @@ function App() {
        console.log("Has authenticated")
       setHasConnected(true)
    })
-
+   socket.on("disconnection", (auth:boolean) => {
+    console.log("Has disconnected")
+   setHasConnected(false)
+})
 
     }
   }, [socket])
@@ -60,7 +68,6 @@ function App() {
 
    console.log("Minha response",response)
  }
-  const [inputList, setInputList] = useState([{ name: "", number: "" }]);
  
   // handle input change
       //@ts-ignore
@@ -84,6 +91,41 @@ function App() {
   const handleAddClick = () => {
     setInputList([...inputList, { name: "", number: "" }]);
   };
+
+  const handleModeSelection =  (mode:string) =>{
+
+    switch(mode){
+      case "csv":
+        setSendToCSVContactList(true)
+        setSendToSpecifContacts(false)
+        break;
+      case "specific":
+        setSendToSpecifContacts(true)
+        setSendToCSVContactList(false)
+         break
+
+    }
+
+    setHasChosenMode(true)
+
+  }
+
+ const  handleSendToSpecifContacts = async () =>{
+    await api.post("/send/bulk",{
+    contacts:inputList,
+    message:message
+  });
+  }
+
+  const  handleSendCSV  = async (e:any) =>{
+
+    const formData = new FormData();
+    //@ts-ignore
+    formData.append("file",csv)
+    //@ts-ignore
+    formData.append("message",message);
+    await api.post("/send/bulk/csv", formData,{headers: {'Content-Type': 'multipart/form-data' }});
+  }
  
   return (
 
@@ -93,7 +135,12 @@ function App() {
 
       { qrCode && !hasConnected && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
 
-     {!hasConnected&&<button onClick={handleConnection}>Conectar</button>}
+     {!hasConnected&&!qrCode&&<button onClick={handleConnection}>Conectar</button>}
+
+     {hasConnected&&!hasChosenMode&&<>
+     <button onClick={()=>handleModeSelection("csv")}>Enviar por Csv</button>
+     <button onClick={()=>handleModeSelection("specific")}>Enviar para contatos especificos</button>
+     </>}
 
     { hasConnected && sendToSpecificContacts&&<>
      {inputList.map((contact, i) => {
@@ -121,17 +168,21 @@ function App() {
               {inputList.length - 1 === i && <button onClick={handleAddClick}>Adicionar Contado</button>}
             </div>
           </div>
-          <button>Enviar Mensagem</button>
+          <input placeholder="Digite a mensagem desejada" value={message} onChange={(e)=>setMessage(e.target.value)}></input>
+          <button onClick={handleSendToSpecifContacts}>Enviar Mensagem</button>
           </>
         );
       })}
   </>}
-  {hasConnected&&sendToCSVcontactList&&
+  {hasConnected&&sendToCSVContactList&&
   <>
-    <div className="box">,
-      <button>Enviar Arquivo CSV</button>
-      <button>Enviar enviar para contatos</button>
-    </div>
+  
+    <input placeholder="Digite a mensagem desejada" value={message} onChange={(e)=>setMessage(e.target.value)}></input>
+    {/* @ts-ignore*/}
+    <input type="file" style={{display:'block',marginTop:15}}  value={csv}onChange={(e)=>setCSV(e.target.files[0])}/>
+    <button onClick={handleSendCSV}>Enviar Mensagem</button>
+
+
   </>}
     </div >
   );
