@@ -28,7 +28,7 @@ function App() {
 
 
 
-  const ENDPOINT = "http://localhost:5000";
+  const ENDPOINT = "http://localhost:4000";
 
   useEffect(() => {
     // @ts-ignore
@@ -64,7 +64,7 @@ function App() {
   }, [socket])
 
  const handleConnection = async ()=>{
-   const response = await api.post("/create/session");
+   const response = await api.post("/whatsapp/create/session");
 
    console.log("Minha response",response)
  }
@@ -111,7 +111,7 @@ function App() {
   }
 
  const  handleSendToSpecifContacts = async () =>{
-    await api.post("/send/bulk",{
+    await api.post("/whatsapp/send/bulk",{
     contacts:inputList,
     message:message
   });
@@ -124,7 +124,7 @@ function App() {
     formData.append("file",csv)
     //@ts-ignore
     formData.append("message",message);
-    await api.post("/send/bulk/csv", formData,{headers: {'Content-Type': 'multipart/form-data' }});
+    await api.post("/whatsapp/send/bulk/csv", formData,{headers: {'Content-Type': 'multipart/form-data' }});
   }
  const handleDisconnection = async ()=>{
   setSendToSpecifContacts(false)
@@ -132,13 +132,14 @@ function App() {
   setHasChosenMode(false)
   setHasConnected(false)
   setQrCode('')
+  socket?.emit("client diconnection","user has disconnected")
 
  }
   return (
 
     <div className="App">
 
-      { qrCode && !hasConnected && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
+      {qrCode && !hasConnected && <img src={`data:image/png;base64,${String(qrCodeFile)}`}/>}
 
      {!hasConnected&&!qrCode&&<button onClick={handleConnection}>Conectar</button>}
 
