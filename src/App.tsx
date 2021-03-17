@@ -28,7 +28,7 @@ function App() {
 
 
 
-  const ENDPOINT = "http://localhost:4000";
+  const ENDPOINT = "https://sms-development-server.herokuapp.com";
 
   useEffect(() => {
     // @ts-ignore
@@ -180,18 +180,16 @@ function App() {
         );
       })}
   </>}
-  {hasConnected&&sendToCSVContactList&&
+  {hasConnected
+  &&sendToCSVContactList&&
   <>
-  
     <input placeholder="Digite a mensagem desejada" value={message} onChange={(e)=>setMessage(e.target.value)}></input>
     {/* @ts-ignore*/}
     <input type="file" style={{display:'block',marginTop:15}}  onChange={(e)=>setCSV(e.target.files[0])}/>
     <button onClick={handleSendCSV}>Enviar Mensagem</button>
-
-
   </>}
   {hasConnected&&<button onClick={handleDisconnection} style={{display:'block',marginTop:15}}>Desconectar</button>}
-    </div >
+    </div>
   );
 }
 
