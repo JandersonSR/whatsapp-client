@@ -30,9 +30,9 @@ function App() {
 
   const ENDPOINT = "https://sms-development-server.herokuapp.com";
 
+  // const ENDPOINT = "http://localhost:4000"
   useEffect(() => {
     // @ts-ignore
-
     setSocket(socketIOClient(ENDPOINT));
 
   }, [ENDPOINT]);
@@ -120,7 +120,7 @@ function App() {
   const  handleSendCSV  = async (e:any) =>{
 
     const formData = new FormData();
-    //@ts-ignore
+    //@ts-ignore 
     formData.append("file",csv)
     //@ts-ignore
     formData.append("message",message);
