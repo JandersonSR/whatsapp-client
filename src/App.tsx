@@ -31,7 +31,7 @@ function App() {
 
   // const ENDPOINT = "https://sms-production-server.herokuapp.com";
 
-  const ENDPOINT = "http://10.10.0.109:4000"
+  const ENDPOINT = "http://localhost:3007"
   // const ENDPOINT = "http://10.10.0.109:5003"
   useEffect(() => {
     // @ts-ignore
